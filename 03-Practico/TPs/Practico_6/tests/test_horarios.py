@@ -17,7 +17,10 @@ def test_seleccionar_un_horario_en_el_pasado(servicio, ahora):
 
 
 @pytest.mark.parametrize("hora", range(9, 18))
-def test_aceptar_cada_turno_horario_disponible(servicio, ahora, hora):
+def test_aceptar_cada_turno_horario_disponible(servicio, hora):
+    # Se parte de las 8:00 para que todos los turnos 9-17 sean futuros y con
+    # la anticipación mínima exigida.
+    ahora = datetime(2026, 10, 20, 8, 0)
     turno = datetime(2026, 10, 20, hora, 0)
 
     assert servicio.seleccionar_horario(turno, ahora) == turno
