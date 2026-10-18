@@ -95,6 +95,7 @@ class ServicioInscripcion:
     EDAD_MINIMA = {Actividad.TIROLESA: 8, Actividad.PALESTRA: 12}
     ACTIVIDADES_CON_VESTIMENTA = (Actividad.TIROLESA, Actividad.PALESTRA)
     TALLES = frozenset({"XS", "S", "M", "L", "XL", "XXL"})
+    PRECIO_ADICIONAL = 0  # Decisión del grupo: incluido con la entrada.
     CUPO_MAXIMO = {
         Actividad.SAFARI: 8,
         Actividad.TIROLESA: 10,
@@ -126,7 +127,10 @@ class ServicioInscripcion:
         inscripciones_existentes: Mapping[tuple[str, datetime], Actividad] | None = None,
     ) -> None:
         self.cupos = dict(cupos or {})
-        self.inscripciones_existentes = dict(inscripciones_existentes or {})
+        self.inscripciones_existentes = {
+            (self._normalizar_dni(dni) if self._dni_valido(dni) else str(dni), horario): actividad
+            for (dni, horario), actividad in (inscripciones_existentes or {}).items()
+        }
         self.correos_enviados: list[Confirmacion] = []
         for (actividad, _), disponibles in self.cupos.items():
             if actividad in self.CUPO_MAXIMO and (
@@ -193,7 +197,11 @@ class ServicioInscripcion:
             raise DatosVisitanteInvalidos("El nombre es obligatorio")
         if isinstance(visitante.dni, bool) or not self._dni_valido(visitante.dni):
             raise DatosVisitanteInvalidos("El DNI debe contener solo dígitos")
-        if isinstance(visitante.edad, bool) or not isinstance(visitante.edad, int) or visitante.edad < 0:
+        if (
+            isinstance(visitante.edad, bool)
+            or not isinstance(visitante.edad, int)
+            or visitante.edad < 0
+        ):
             raise DatosVisitanteInvalidos("La edad debe ser un entero no negativo")
         if visitante.edad == 0 and actividad in self.EDAD_MINIMA:
             raise DatosVisitanteInvalidos("La edad no alcanza el mínimo de la actividad")
@@ -207,7 +215,11 @@ class ServicioInscripcion:
             raise EdadNoPermitida("El visitante no alcanza la edad mínima de la actividad")
 
     def validar_participantes(self, cantidad_personas: int, visitantes: Sequence[Visitante]) -> None:
-        if isinstance(cantidad_personas, bool) or not isinstance(cantidad_personas, int) or cantidad_personas < 1:
+        if (
+            isinstance(cantidad_personas, bool)
+            or not isinstance(cantidad_personas, int)
+            or cantidad_personas < 1
+        ):
             raise DatosVisitanteInvalidos("La cantidad de personas debe ser al menos 1")
         if not isinstance(visitantes, Sequence) or isinstance(visitantes, (str, bytes)):
             raise DatosVisitanteInvalidos("Debe informar una lista de visitantes")
@@ -218,10 +230,22 @@ class ServicioInscripcion:
 
     @staticmethod
     def _validar_email(email: object) -> None:
-        if not isinstance(email, str) or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+        if not isinstance(email, str) or not re.fullmatch(
+            r"[^\s@]+@[^\s@]+\.[^\s@]+", email
+        ):
             raise DatosVisitanteInvalidos("Debe informar un correo electrónico válido")
 
     def inscribir(self, solicitud: SolicitudInscripcion, ahora: datetime) -> Confirmacion:
+        dnis = self._validar_solicitud(solicitud, ahora)
+        confirmacion = self._crear_confirmacion(solicitud)
+
+        self.cupos[(solicitud.actividad, solicitud.horario)] -= solicitud.cantidad_personas
+        for dni in dnis:
+            self.inscripciones_existentes[(dni, solicitud.horario)] = solicitud.actividad
+        self.enviar_email(confirmacion)
+        return confirmacion
+
+    def _validar_solicitud(self, solicitud: SolicitudInscripcion, ahora: datetime) -> tuple[str, ...]:
         terminos = self.terminos_para(solicitud.actividad)
         if solicitud.acepta_terminos is not True or (
             solicitud.id_terminos_aceptados is not None
@@ -238,42 +262,48 @@ class ServicioInscripcion:
             solicitud.cantidad_personas,
         )
         dnis_solicitud = set()
+        dnis_ordenados = []
         for visitante in solicitud.visitantes:
             self.validar_visitante(visitante, solicitud.actividad)
             dni = self._normalizar_dni(visitante.dni)
-            if dni in dnis_solicitud or (dni, solicitud.horario) in self.inscripciones_existentes:
+            if dni in dnis_solicitud or (
+                dni, solicitud.horario
+            ) in self.inscripciones_existentes:
                 raise InscripcionDuplicada("El visitante ya tiene una actividad en ese horario")
             dnis_solicitud.add(dni)
+            dnis_ordenados.append(dni)
+        return tuple(dnis_ordenados)
 
+    def _crear_confirmacion(self, solicitud: SolicitudInscripcion) -> Confirmacion:
         numero_orden = f"ORD-{uuid4().hex[:8].upper()}"
-        subtotales = tuple(0 for _ in solicitud.visitantes)
+        subtotales = tuple(self.PRECIO_ADICIONAL for _ in solicitud.visitantes)
+        total = sum(subtotales)
         detalle = "\n".join(
             f"{v.nombre} - DNI {v.dni} - Edad {v.edad}"
-            + (f" - Talle {v.talla}" if solicitud.actividad in self.ACTIVIDADES_CON_VESTIMENTA else "")
-            + " - Subtotal $0"
+            + (
+                f" - Talle {v.talla}"
+                if solicitud.actividad in self.ACTIVIDADES_CON_VESTIMENTA
+                else ""
+            )
+            + f" - Subtotal ${self.PRECIO_ADICIONAL}"
             for v in solicitud.visitantes
         )
-        confirmacion = Confirmacion(
+        return Confirmacion(
             numero_orden=numero_orden,
             destinatario=solicitud.email,
             resumen=(
                 f"Orden {numero_orden}. Inscripción a {solicitud.actividad.value} "
                 f"el {solicitud.horario.strftime('%d/%m/%Y')} "
                 f"a las {solicitud.horario.strftime('%H:%M')}.\n"
-                f"Participantes:\n{detalle}\nTotal $0"
+                f"Participantes:\n{detalle}\nTotal ${total}"
             ),
             codigos_qr=tuple(
                 self._crear_qr_uri(f"{numero_orden}:{self._normalizar_dni(v.dni)}:{uuid4().hex}")
                 for v in solicitud.visitantes
             ),
             subtotales=subtotales,
-            total=sum(subtotales),
+            total=total,
         )
-        self.cupos[(solicitud.actividad, solicitud.horario)] -= solicitud.cantidad_personas
-        for dni in dnis_solicitud:
-            self.inscripciones_existentes[(dni, solicitud.horario)] = solicitud.actividad
-        self.enviar_email(confirmacion)
-        return confirmacion
 
     def enviar_email(self, confirmacion: Confirmacion) -> None:
         """Simulación local del envío, reemplazable por un emisor real."""

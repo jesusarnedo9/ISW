@@ -9,7 +9,6 @@ import pytest
 from ecoharmony_park import (
     Actividad,
     DatosVisitanteInvalidos,
-    EdadNoPermitida,
     HorarioInvalido,
     InscripcionDuplicada,
     ServicioInscripcion,
@@ -110,7 +109,7 @@ def test_rechaza_cantidad_no_entera(servicio, cantidad):
         servicio.validar_participantes(cantidad, [])
 
 
-@pytest.mark.parametrize("visitantes", [None, "Ana", [None]])
+@pytest.mark.parametrize("visitantes", [None, "Ana", [], [None]])
 def test_rechaza_conjunto_de_visitantes_malformado(servicio, visitantes):
     with pytest.raises(DatosVisitanteInvalidos):
         servicio.validar_participantes(1, visitantes)
@@ -123,12 +122,23 @@ def test_rechaza_dni_no_positivo_o_con_formato_invalido(servicio, visitante_vali
         servicio.validar_visitante(replace(visitante_valido, dni=dni), Actividad.TIROLESA)
 
 
+def test_acepta_dni_numerico_ingresado_como_texto(servicio, visitante_valido):
+    assert servicio.validar_visitante(
+        replace(visitante_valido, dni="30123456"), Actividad.TIROLESA
+    ) is None
+
+
 # CP12/13: "todas las edades" incluye menores de un año; talle no aplica a Safari.
 @pytest.mark.parametrize("actividad", [Actividad.SAFARI, Actividad.JARDINERIA])
 def test_edad_cero_es_valida_si_la_actividad_admite_todas_las_edades(
     servicio, visitante_valido, actividad
 ):
     assert servicio.validar_visitante(replace(visitante_valido, edad=0, talla=None), actividad) is None
+
+
+def test_rechaza_edad_no_informada(servicio, visitante_valido):
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_visitante(replace(visitante_valido, edad=None), Actividad.TIROLESA)
 
 
 def test_talle_no_se_valida_si_la_actividad_no_lo_requiere(servicio, visitante_valido):
@@ -176,6 +186,18 @@ def test_acepta_terminos_de_la_actividad_elegida(
     assert servicio.inscribir(pedido, ahora).numero_orden
 
 
+def test_rechaza_terminos_sin_respuesta(servicio, ahora, horario_seleccionado, visitante_valido):
+    pedido = solicitud(
+        Actividad.TIROLESA,
+        horario_seleccionado,
+        [visitante_valido],
+        acepta_terminos=None,
+    )
+
+    with pytest.raises(TerminosNoAceptados):
+        servicio.inscribir(pedido, ahora)
+
+
 # CP15: otra hora es válida; el mismo DNI y hora no.
 def test_permite_otra_actividad_en_un_horario_diferente(
     ahora, horario_seleccionado, visitante_valido
@@ -187,6 +209,18 @@ def test_permite_otra_actividad_en_un_horario_diferente(
     )
 
     assert servicio.inscribir(solicitud(Actividad.TIROLESA, horario_seleccionado, [visitante_valido]), ahora).numero_orden
+
+
+def test_dni_con_ceros_iniciales_no_evita_la_restriccion_de_horario(
+    ahora, horario_seleccionado, visitante_valido
+):
+    servicio = ServicioInscripcion(
+        cupos={(Actividad.TIROLESA, horario_seleccionado): 1},
+        inscripciones_existentes={("030123456", horario_seleccionado): Actividad.SAFARI},
+    )
+
+    with pytest.raises(InscripcionDuplicada):
+        servicio.inscribir(solicitud(Actividad.TIROLESA, horario_seleccionado, [visitante_valido]), ahora)
 
 
 # CP16: el destinatario debe permitir la confirmación.
@@ -235,9 +269,34 @@ def test_confirmacion_contiene_detalle_importes_y_qr_mostrables(
         assert uri.startswith("data:image/svg+xml;base64,")
         assert b"<svg" in base64.b64decode(uri.split(",", 1)[1])
     assert correos == [confirmacion]
+    assert ("30123456", horario_seleccionado) in servicio.inscripciones_existentes
+    assert ("32123456", horario_seleccionado) in servicio.inscripciones_existentes
     html = servicio.mostrar_confirmacion(confirmacion)
     assert all(uri in html for uri in confirmacion.codigos_qr)
     assert html.count("<img ") == 2
+
+
+def test_rechazo_por_cupo_no_genera_qr_ni_correo(
+    servicio, ahora, horario_seleccionado, visitante_valido, monkeypatch
+):
+    segundo = Visitante("Luis", 32123456, 27, "L")
+    tercero = Visitante("Eva", 33123456, 29, "S")
+    qr_generados = []
+    correos = []
+    monkeypatch.setattr(servicio, "_crear_qr_uri", lambda dato: qr_generados.append(dato))
+    monkeypatch.setattr(servicio, "enviar_email", correos.append)
+    cupos_antes = servicio.cupos.copy()
+
+    with pytest.raises(SinCupo):
+        servicio.inscribir(
+            solicitud(Actividad.TIROLESA, horario_seleccionado, [visitante_valido, segundo, tercero]),
+            ahora,
+        )
+
+    assert servicio.cupos == cupos_antes
+    assert servicio.inscripciones_existentes == {}
+    assert qr_generados == []
+    assert correos == []
 
 
 # CP19: consultar cupos y días abiertos para alimentar la interfaz.

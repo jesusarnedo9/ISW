@@ -2,7 +2,7 @@
 
 ## Matriz de clases de equivalencia y casos de prueba
 
-**Estado:** borrador para revisión del grupo, 18/10/2026. **Alcance:** la historia «Como visitante quiero inscribirme a una actividad para reservar mi lugar en la misma». Este documento precede a las próximas pruebas TDD; no cambia el código.
+**Estado:** matriz aplicada en Red → Green → Refactor, 18/10/2026; las decisiones [DEC] siguen sujetas a validación del grupo/docentes. **Alcance:** la historia «Como visitante quiero inscribirme a una actividad para reservar mi lugar en la misma».
 
 ### Cómo leer esta matriz
 
@@ -93,13 +93,13 @@ En todos los casos se parte del **caso base**; cada fila modifica solo la condic
 | **CP11 / Alta** | CEV39 y CEI40–43: DNI numérico; vacío; `"30A23456"`; 0; −1; booleano. | Éxito o CSI12. El DNI negativo ya tiene prueba Red. |
 | **CP12 / Alta** | CEV44–46, CEI47–51: Safari/Jardinería edad 0; Tirolesa 7/8; Palestra 11/12; edad ausente, negativa o no entera. | Éxito en 0/8/12 según actividad; CSI13 o CSI14 en inválidos. La edad 0 en Safari/Jardinería requiere corregir el código si se adopta [DEC]. |
 | **CP13 / Alta** | CEV52–53 y CEI54–56: seis talles permitidos; omisión en Safari/Jardinería; omisión, `"XXXL"` o número en Tirolesa/Palestra. | Éxito o CSI15. `"XXXL"` ya tiene dos casos Red. |
-| **CP14 / Alta** | CEV57 y CEI58–60: acepta versión propia; rechaza; no responde; acepta ID de otra actividad. | Éxito solo con aceptación correspondiente; CSI16 en el resto. CEI60 aún no puede expresarse con el booleano actual. |
+| **CP14 / Alta** | CEV57 y CEI58–60: acepta versión propia; rechaza; no responde; acepta ID de otra actividad. | Éxito solo con aceptación correspondiente; CSI16 en el resto. El servicio admite un ID de términos además del booleano de aceptación. |
 | **CP15 / Alta** | CEV61–62 y CEI63–64: sin reserva previa; reserva a otra hora; reserva a la misma hora; DNI duplicado en la solicitud. | Éxito en los dos primeros; CSI17 y CSI19 en los demás. El duplicado en la solicitud ya tiene prueba Red. |
 | **CP16 / Media** | CEV65 y CEI66–67: `ana@example.com`; vacío; `"ana-sin-arroba"`. | Éxito/CSV08 con correo válido; CSI18 y CSI21 con inválidos si se adopta [DEC]. |
 | **CP17 / Alta** | Una inscripción válida con N=2 y emisor simulado observado por un espía. | Un número de orden, detalle de las 2 personas, 2 QR generados, subtotales `$0`, total `$0` y una sola invocación de envío: CSV05–09. |
 | **CP18 / Alta** | Repetir un representante de cada rechazo con cupos, registros y espía de correo inicializados. | Error correspondiente, cupos/registros sin cambios y cero envíos: CSI19–21. |
-| **CP19 / Media** | Vista de calendario con lunes, 25/12 y 01/01; vista de actividad con cupos. | CSV10–11, CSI22–23. Solo aplicable cuando exista interfaz/presentador. |
-| **CP20 / Media** | Inscripción válida observada desde la pantalla de confirmación. | CSV07: el QR generado se muestra al visitante. Solo aplicable cuando exista interfaz/presentador. |
+| **CP19 / Media** | Vista de calendario con lunes, 25/12 y 01/01; vista de actividad con cupos. | CSV10–11, CSI22–23. El servicio expone días habilitados y cupos; la interfaz móvil completa queda fuera de este repositorio. |
+| **CP20 / Media** | Inscripción válida observada desde la confirmación. | CSV07: el QR generado se incluye en un fragmento HTML mostrable. La aplicación móvil completa queda fuera de este repositorio. |
 
 ### Ejemplo concreto: de la matriz a Python
 
@@ -119,9 +119,9 @@ with pytest.raises(HorarioInvalido):
 2. **Actividad sin cargo adicional.** La propuesta de `$0` permite cumplir el requisito de subtotal y total sin inventar un pago ajeno a la historia. Si se asignan precios, debe cambiarse CSV09 y CP17 antes de escribir sus asserts.
 3. **Edad 0 en Safari/Jardinería.** La interpretación de «todas las edades» incluye bebés menores de un año. Conviene acordarlo explícitamente porque el servicio actual exige edad mayor que 0.
 4. **Formato de correo y nombres.** La FAQ no da una expresión regular ni longitud máxima. La matriz propone validaciones mínimas y evita reglas arbitrarias.
-5. **QR real y visualización.** El servicio actual devuelve cadenas `QR-...` y no hay interfaz. Para CP20 habrá que definir un generador de QR y una vista/presentador; hasta entonces solo puede probarse que se generan identificadores y que se envían al punto de integración.
+5. **Interfaz móvil completa.** El servicio ya genera QR SVG reales y un fragmento HTML que los muestra. El proyecto todavía no contiene una aplicación móvil ni el calendario visual, por lo que las pruebas de pantalla completas requieren otra capa de interfaz.
 6. **Falla técnica del envío de correo.** La FAQ admite simular el envío, pero no define reintentos ni si la reserva se revierte cuando el emisor falla. No se agregará una clase de rechazo con rollback sin decidir antes esa política.
 
 ### Estado respecto del repositorio actual
 
-La rama `test/inscripciones-red-faltantes` contiene **79 casos que pasan y 7 Red**. Ya hay pruebas de horarios, cupos, edades mínimas, talles, participantes, términos booleanos, solapamiento y confirmación básica. Las 7 Red existentes se relacionan con **CEI05–06, CEI13, CEI42, CEI55 y CEI64**. Esta documentación deja visible lo que falta especificar o probar antes de continuar con Green.
+La rama `test/inscripciones-red-faltantes` partió de **79 aprobadas y 7 Red**. Al agregar los casos de esta matriz, el checkpoint Red quedó en **93 aprobadas y 35 Red**. Tras Green, un caso adicional sobre DNI con ceros iniciales y casos de cobertura de clases antes implícitas, la suite completa queda en **134 aprobadas**. Los cambios están separados en commits Red, Green y Refactor para que se vea el ciclo TDD.
