@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoHarmony Park — Inscripción a Actividades</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Barra Superior de Navegación -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">EcoHarmony Park</h1>
+          <span class="brand-subtitle">Reserva de Actividades — Práctico 6 (TDD Grupo 4)</span>
+        </div>
+      </div>
+
+      <!-- Barra de Simulación y QA -->
+      <div class="qa-toolbar">
+        <div class="qa-simulacion">
+          <label for="qa-ahora-input">Momento simulado (Ahora):</label>
+          <input type="datetime-local" id="qa-ahora-input" class="qa-input">
+        </div>
+        <div class="qa-actions">
+          <button type="button" id="btn-ver-correos" class="btn-secondary btn-sm" title="Ver bandeja de correos simulados">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Correos (<span id="correos-contador">0</span>)
+          </button>
+          <button type="button" id="btn-reset-datos" class="btn-outline btn-sm" title="Restablecer cupos a valores iniciales">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            Reiniciar
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barra de Casos de Prueba Rápidos para Evaluación -->
+  <section class="presets-section">
+    <div class="presets-container">
+      <span class="presets-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Pruebas de Usuario (Consigna):
+      </span>
+      <div class="presets-pills">
+        <button type="button" class="preset-btn" data-preset="1" title="Inscribirse con cupo, horario, datos válidos y términos aceptados">CP1: Flujo Válido</button>
+        <button type="button" class="preset-btn" data-preset="2" title="Inscribirse a actividad sin cupos en ese horario">CP2: Sin Cupo</button>
+        <button type="button" class="preset-btn" data-preset="3" title="Inscribirse en Safari/Jardinería sin talle">CP3: Omitir Talle</button>
+        <button type="button" class="preset-btn" data-preset="4" title="Inscribirse en un lunes o feriado">CP4: Parque Cerrado</button>
+        <button type="button" class="preset-btn" data-preset="5" title="Inscribirse sin aceptar los términos">CP5: Sin Términos</button>
+        <button type="button" class="preset-btn" data-preset="6" title="Inscribirse en Tirolesa/Palestra sin talle">CP6: Sin Talle</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contenido Principal -->
+  <main class="app-main">
+    <form id="form-inscripcion" class="workflow-container" novalidate>
+
+      <!-- PASO 1: Fecha y Turno Horario -->
+      <section class="card step-card" id="step-horarios">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <div>
+            <h2 class="step-title">Fecha y Turno Horario</h2>
+            <p class="step-desc">El parque atiende de martes a domingo de 09:00 a 17:00 hs. Turnos de 1 hora en punto.</p>
+          </div>
+        </div>
+
+        <div class="step-body">
+          <div class="date-selector-row">
+            <div class="form-group">
+              <label for="fecha-visita" class="form-label">Fecha de Visita:</label>
+              <input type="date" id="fecha-visita" class="form-control" required>
+            </div>
+            <div id="parque-estado-badge" class="status-indicator">
+              <span class="indicator-dot"></span>
+              <span id="parque-estado-texto">Seleccione una fecha</span>
+            </div>
+          </div>
+
+          <div class="turnos-group">
+            <label class="form-label">Turno Horario:</label>
+            <div id="turnos-grid" class="turnos-grid">
+              <!-- Se inyecta dinámicamente con los 9 turnos de 09:00 a 17:00 -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PASO 2: Selección de Actividad -->
+      <section class="card step-card" id="step-actividad">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <div>
+            <h2 class="step-title">Selección de Actividad</h2>
+            <p class="step-desc">Elija una de las 4 actividades disponibles con cupos habilitados para el horario seleccionado.</p>
+          </div>
+        </div>
+
+        <div class="step-body">
+          <div id="actividades-grid" class="actividades-grid">
+            <!-- Se inyecta dinámicamente: Tirolesa, Safari, Palestra, Jardinería -->
+          </div>
+        </div>
+      </section>
+
+      <!-- PASO 3: Cantidad y Datos de Visitantes -->
+      <section class="card step-card" id="step-visitantes">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <div>
+            <h2 class="step-title">Participantes y Correo</h2>
+            <p class="step-desc">Indique la cantidad de personas e ingrese los datos de cada visitante.</p>
+          </div>
+        </div>
+
+        <div class="step-body">
+          <div class="stepper-row">
+            <div class="form-group">
+              <label class="form-label">Cantidad de Personas:</label>
+              <div class="stepper-control">
+                <button type="button" id="btn-decrementar" class="stepper-btn" aria-label="Restar una persona">−</button>
+                <input type="number" id="cantidad-personas" class="stepper-input" min="1" max="12" value="1" readonly>
+                <button type="button" id="btn-incrementar" class="stepper-btn" aria-label="Sumar una persona">+</button>
+              </div>
+            </div>
+            <div class="form-group email-contact-group">
+              <label for="email-contacto" class="form-label">Correo de Confirmación:</label>
+              <input type="email" id="email-contacto" class="form-control" placeholder="visitante@example.com" value="visitante@example.com" required>
+            </div>
+          </div>
+
+          <div id="visitantes-fichas" class="visitantes-container">
+            <!-- Fichas generadas dinámicamente según la cantidad -->
+          </div>
+        </div>
+      </section>
+
+      <!-- PASO 4: Términos y Condiciones Específicos -->
+      <section class="card step-card" id="step-terminos">
+        <div class="step-header">
+          <span class="step-number">4</span>
+          <div>
+            <h2 class="step-title">Términos y Condiciones de la Actividad</h2>
+            <p class="step-desc">Cada actividad cuenta con condiciones específicas de seguridad y convivencia.</p>
+          </div>
+        </div>
+
+        <div class="step-body">
+          <div class="terminos-box">
+            <div class="terminos-badge" id="terminos-id">TYC-TIRO-v1</div>
+            <p class="terminos-texto" id="terminos-texto">
+              Seleccione una actividad para visualizar los términos y condiciones específicos.
+            </p>
+          </div>
+
+          <div class="terminos-checkbox-wrapper">
+            <label class="checkbox-label">
+              <input type="checkbox" id="check-terminos" class="custom-checkbox">
+              <span>He leído y acepto los términos y condiciones específicos de la actividad en la que participaremos.</span>
+            </label>
+          </div>
+
+          <!-- Mensaje de error / feedback del backend -->
+          <div id="alerta-error" class="alerta alerta-error" style="display: none;" role="alert">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="alerta-error-texto">Ocurrió un error.</span>
+          </div>
+
+          <!-- Botón de Envío -->
+          <div class="submit-action-row">
+            <button type="submit" id="btn-confirmar" class="btn-primary btn-lg">
+              <span class="btn-text">Confirmar Inscripción</span>
+              <span class="spinner" style="display: none;" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </form>
+  </main>
+
+  <!-- MODAL: Comprobante de Confirmación y Códigos QR -->
+  <div id="modal-comprobante" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="success-icon-badge" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <h2 id="modal-titulo" class="modal-title">¡Inscripción Confirmada!</h2>
+          <span class="modal-subtitle">Su lugar en la actividad ha sido reservado con éxito.</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btn-cerrar-modal" aria-label="Cerrar comprobante">&times;</button>
+      </div>
+
+      <div class="modal-body" id="modal-comprobante-body">
+        <!-- Detalle de orden, resumen y códigos QR SVG inyectados aquí -->
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" id="btn-modal-ver-correo">Ver Correo Simulado</button>
+        <button type="button" class="btn-primary" id="btn-modal-nueva-reserva">Realizar Otra Inscripción</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Bandeja de Correos Simulados -->
+  <div id="modal-correos" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="correos-modal-titulo">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div>
+          <h2 id="correos-modal-titulo" class="modal-title">Bandeja de Correos Simulados</h2>
+          <span class="modal-subtitle">Comprobantes enviados a través de <code>ServicioInscripcion.enviar_email</code></span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btn-cerrar-correos" aria-label="Cerrar bandeja">&times;</button>
+      </div>
+      <div class="modal-body" id="correos-lista-container">
+        <!-- Lista de correos renderizada aquí -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Script modular de la aplicación -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
