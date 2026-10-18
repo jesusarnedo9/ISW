@@ -93,3 +93,108 @@ def test_rechazar_cantidad_de_personas_cero(servicio):
     with pytest.raises(DatosVisitanteInvalidos):
         servicio.validar_participantes(0, [])
 
+
+#### Rami ####
+
+@pytest.mark.parametrize("dni", [
+    "",
+    "   ",
+    "ABC123",
+    "30123A56"
+])
+def test_rechazar_dni_invalido(servicio, dni):
+    # Precondiciones
+    visitante = Visitante(
+        nombre="Ana",
+        dni=dni,
+        edad=25,
+        talla="M"
+    )
+
+    # Pasos y resultado
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_visitante(
+            visitante,
+            Actividad.TIROLESA
+        )
+
+
+@pytest.mark.parametrize("edad", [-10, -1, 0])
+def test_rechazar_edad_no_positiva(servicio, edad):
+    # Precondiciones
+    visitante = Visitante(
+        nombre="Ana",
+        dni=30123456,
+        edad=edad,
+        talla="M"
+    )
+
+    # Pasos y resultado
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_visitante(
+            visitante,
+            Actividad.TIROLESA
+        )
+
+
+@pytest.mark.parametrize("nombre", [
+    " ",
+    "   ",
+    "\t"
+])
+def test_rechazar_nombre_solo_espacios(servicio, nombre):
+    # Precondiciones
+    visitante = Visitante(
+        nombre=nombre,
+        dni=30123456,
+        edad=25,
+        talla="M"
+    )
+
+    # Pasos y resultado
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_visitante(
+            visitante,
+            Actividad.TIROLESA
+        )
+
+
+@pytest.mark.parametrize("cantidad", [-1, -5, -10])
+def test_rechazar_cantidad_participantes_negativa(
+    servicio, cantidad
+):
+    # Precondiciones
+    visitantes = []
+
+    # Pasos y resultado
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_participantes(
+            cantidad,
+            visitantes
+        )
+
+
+def test_rechazar_visitantes_superiores_a_cantidad(
+    servicio, visitante_valido
+):
+    # Precondiciones
+    cantidad_personas = 1
+
+    segundo_visitante = Visitante(
+        nombre="Juan Pérez",
+        dni=35234567,
+        edad=30,
+        talla="L"
+    )
+
+    visitantes = [
+        visitante_valido,
+        segundo_visitante
+    ]
+
+    # Pasos y resultado
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_participantes(
+            cantidad_personas,
+            visitantes
+        )

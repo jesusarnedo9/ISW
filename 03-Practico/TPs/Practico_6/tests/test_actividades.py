@@ -2,7 +2,8 @@ from datetime import timedelta
 
 import pytest
 
-from ecoharmony_park import Actividad, EdadNoPermitida, HorarioInvalido, SinCupo, Visitante
+from ecoharmony_park import Actividad, EdadNoPermitida, HorarioInvalido, SinCupo, Visitante, ServicioInscripcion
+
 
 
 def test_elegir_actividad_con_cupo_en_el_horario_seleccionado(servicio, horario_seleccionado):
@@ -89,3 +90,19 @@ def test_rechazar_visitante_por_debajo_de_la_edad_minima(servicio, actividad, ed
     with pytest.raises(EdadNoPermitida):
         servicio.validar_visitante(visitante, actividad)
 
+
+
+
+#### Rami ####
+
+def test_rechazar_horario_no_disponible(horario_seleccionado):
+    # Precondiciones: horario válido en principio, pero sin turno ofertado para la actividad
+    servicio = ServicioInscripcion(cupos={})
+
+    # Pasos y resultado
+    with pytest.raises((SinCupo, HorarioInvalido)):
+        servicio.seleccionar_actividad(
+            Actividad.TIROLESA,
+            horario_actividad=horario_seleccionado,
+            horario_seleccionado=horario_seleccionado,
+        )
