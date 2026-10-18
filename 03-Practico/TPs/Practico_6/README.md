@@ -1,19 +1,24 @@
 # Práctico 6 - TDD: Inscribirme a actividad
 
-Este proyecto contiene únicamente la fase **Red** del ciclo TDD para la historia de usuario:
-
 > Como visitante quiero inscribirme a una actividad para reservar mi lugar en la misma.
 
-La API de `src/ecoharmony_park/inscripciones.py` define el contrato mínimo para que las pruebas puedan importarse y ejecutarse. Sus operaciones todavía lanzan `NotImplementedError` de forma intencional. No hay lógica de negocio implementada.
+La rama `test/inscripciones-adicionales` implementó la primera fase Green. Esta
+rama agrega pruebas Red para reglas de la historia que aún no se validaban:
+actividad obligatoria y perteneciente al catálogo, talle permitido, DNI positivo,
+un solo registro por DNI y turno, y horario obligatorio. También completa la
+prueba que verifica la invocación del envío de correo con la confirmación y sus QR.
 
-## Ejecutar la fase Red
+## Ejecutar las pruebas
 
 ```powershell
 python -m pip install -r requirements-dev.txt
-python -m pytest
+python -m pytest -q
 ```
 
-El resultado esperado en esta etapa es que la colección sea exitosa y que las pruebas fallen. Una prueba verde antes de implementar el comportamiento indicaría que no está comprobando la regla esperada.
+Al crear esta rama, el resultado esperado es **79 pruebas aprobadas y 7 fallidas**.
+Las siete fallas corresponden a las reglas nuevas: la actividad inválida se
+prueba con dos entradas y el talle inválido con dos actividades. No se modificó
+la implementación de `src/ecoharmony_park/inscripciones.py`.
 
 ## Organización
 
@@ -21,6 +26,5 @@ El resultado esperado en esta etapa es que la colección sea exitosa y que las p
 - `tests/test_actividades.py`: disponibilidad, cupos y edades mínimas.
 - `tests/test_visitantes.py`: datos requeridos, tipos, cantidad de participantes y talles.
 - `tests/test_inscripcion.py`: términos, solapamientos y confirmación por correo con QR.
-
-Las pruebas están escritas como tests aislados, con datos fáciles de leer y un escenario por comportamiento, siguiendo los patrones de la cátedra.
+- `tests/test_red_faltantes.py`: reglas pendientes detectadas después de la primera fase Green.
 

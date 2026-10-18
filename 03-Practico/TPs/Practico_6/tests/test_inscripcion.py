@@ -162,15 +162,18 @@ def test_enviar_correo_de_confirmacion(
     servicio, ahora, horario_seleccionado, visitante_valido, monkeypatch
 ):
     # Precondiciones: se define un punto de integración reemplazable para el correo.
-    # El método enviar_email todavía no forma parte del contrato de producción.
+    # Se reemplaza el emisor por un espía para comprobar la invocación.
     correos_enviados = []
     monkeypatch.setattr(
         servicio,
         "enviar_email",
         lambda confirmacion: correos_enviados.append(confirmacion),
-        raising=False,
     )
     solicitud = crear_solicitud_multiple(horario_seleccionado, [visitante_valido])
 
     # Pasos
     confirmacion = servicio.inscribir(solicitud, ahora)
+
+    # Resultado: se envía una sola vez la confirmación con su código QR.
+    assert correos_enviados == [confirmacion]
+    assert all(correos_enviados[0].codigos_qr)
