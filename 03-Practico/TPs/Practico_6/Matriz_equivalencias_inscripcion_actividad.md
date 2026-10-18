@@ -2,7 +2,7 @@
 
 ## Matriz de clases de equivalencia y casos de prueba
 
-**Estado:** matriz aplicada en Red → Green → Refactor, 18/10/2026; las decisiones [DEC] siguen sujetas a validación del grupo/docentes. **Alcance:** la historia «Como visitante quiero inscribirme a una actividad para reservar mi lugar en la misma».
+**Estado:** matriz aplicada en Red → Green → Refactor, 18/10/2026; el grupo confirmó las decisiones de implementación y los textos de términos quedan sujetos a validación docente/PO. **Alcance:** la historia «Como visitante quiero inscribirme a una actividad para reservar mi lugar en la misma».
 
 ### Cómo leer esta matriz
 
@@ -43,7 +43,7 @@ Salvo que el caso indique otra cosa: solicitud el **martes 20/10/2026 a las 08:0
 | **Datos de participantes** | **CEV31** se informa un conjunto con exactamente un registro por cada participante indicado. | **CEI32** conjunto omitido o vacío con cantidad positiva; **CEI33** conjunto no vacío con menos registros que la cantidad; **CEI34** más registros; **CEI35** algún registro es estructuralmente incorrecto, por ejemplo `None` en lugar de una ficha. | Para cantidad 2, comparar listas de 1, 2 y 3 participantes. Los campos individuales se prueban en las filas siguientes. [US] |
 | **Nombre de cada participante** | **CEV36** texto no vacío que identifica a la persona. | **CEI37** ausente, vacío o solo espacios; **CEI38** dato de otro tipo. | No se fija longitud ni se exige alfabeto ASCII: nombres con acentos, espacios o guiones deben poder usarse. Una regla que prohíba dígitos dentro del texto requiere acuerdo adicional. [US] |
 | **DNI de cada participante** | **CEV39** número positivo expresado con dígitos, como entero o cadena numérica. | **CEI40** ausente/vacío; **CEI41** contiene letras u otros caracteres; **CEI42** 0 o negativo; **CEI43** otro tipo de dato (incluido booleano). | No se inventa una longitud fija porque la FAQ no la define. No se admite pasaporte. [FAQ 32; validación de formato propuesta] |
-| **Edad de cada participante** | **CEV44** Safari/Jardinería: edad entera ≥ 0; **CEV45** Tirolesa: entera ≥ 8; **CEV46** Palestra: entera ≥ 12. | **CEI47** ausente; **CEI48** negativa; **CEI49** no entera; **CEI50** Tirolesa de 0 a 7; **CEI51** Palestra de 0 a 11. | 7/8 y 11/12. **[DEC]** Edad 0 representa a un menor de un año y es válida en las actividades «todas las edades»; el código actual la rechaza. [FAQ 15] |
+| **Edad de cada participante** | **CEV44** Safari/Jardinería: edad entera ≥ 0; **CEV45** Tirolesa: entera ≥ 8; **CEV46** Palestra: entera ≥ 12. | **CEI47** ausente; **CEI48** negativa; **CEI49** no entera; **CEI50** Tirolesa de 0 a 7; **CEI51** Palestra de 0 a 11. | 7/8 y 11/12. Edad 0 representa a un menor de un año y es válida en las actividades «todas las edades», conforme a la decisión del grupo y FAQ 15. |
 | **Talle de cada participante** | **CEV52** en Tirolesa/Palestra, uno de XS, S, M, L, XL, XXL; **CEV53** en Safari/Jardinería, campo omitido. | **CEI54** falta talle donde se exige; **CEI55** talle fuera del catálogo; **CEI56** valor de tipo incorrecto donde se exige. | En Safari/Jardinería el formulario no necesita pedir talle. Si llega uno por API, se propone ignorarlo; no es un motivo de rechazo definido por la FAQ. [FAQ 9, 14] |
 | **Términos de la actividad** | **CEV57** el visitante acepta expresamente la versión de términos correspondiente a la actividad elegida. | **CEI58** rechaza los términos; **CEI59** no responde; **CEI60** acepta términos de otra actividad o una versión no vigente. | **[DEC]** Identificar los términos con un ID/version por actividad; un booleano aislado no permite comprobar CEI60. [FAQ 16, US] |
 | **Reservas previas del DNI** | **CEV61** no hay otra reserva en ese horario; **CEV62** existe reserva del mismo DNI en un horario distinto. | **CEI63** el DNI ya está reservado en ese mismo horario, sea para igual u otra actividad; **CEI64** el DNI aparece dos veces en la solicitud actual para el mismo horario. | Las actividades duran una hora; el choque se evalúa sobre el horario de inicio. [FAQ 12, 29] |
@@ -61,7 +61,7 @@ Salvo que el caso indique otra cosa: solicitud el **martes 20/10/2026 a las 08:0
 | **Correo de confirmación** | **CSV08** se invoca una vez el envío simulado al correo indicado, con resumen, número de orden, detalle de participantes y sus QR; **CSV09** el mensaje contiene subtotal(es) y total. | **CSI21** no se invoca envío si la inscripción se rechaza. El comportamiento ante falla técnica del emisor no fue especificado **[PEND]**. |
 | **Calendario y cupos visibles** | **CSV10** solo pueden seleccionarse días abiertos; **CSV11** se muestran los cupos disponibles del turno. | **CSI22** lunes, 25/12 y 01/01 aparecen deshabilitados; **CSI23** un turno agotado o no ofrecido no se puede confirmar. Estas son salidas de interfaz, no de la clase Python actual. [FAQ 2, 8] |
 
-Para **CSV09**, propongo **[DEC] inscripción sin cargo adicional**, incluida con la entrada: subtotal por participante `$0` y total `$0`. La FAQ exige esos campos pero no informa precios de actividades ni un pago dentro de esta historia. Esta decisión debe figurar como supuesto del grupo hasta que la cátedra o el PO la valide; no se deben reutilizar los precios de entradas (VIP/común) como si fueran precios de actividades.
+Para **CSV09**, el grupo acordó **[DEC] inscripción sin cargo adicional**, incluida con la entrada: subtotal por participante `$0` y total `$0`. La FAQ exige esos campos pero no informa precios de actividades ni un pago dentro de esta historia. No se reutilizan los precios de entradas (VIP/común) como si fueran precios de actividades.
 
 ### Términos propuestos para poder probar CEV57 y CEI60
 
@@ -91,7 +91,7 @@ En todos los casos se parte del **caso base**; cada fila modifica solo la condic
 | **CP09 / Alta** | CEV31 y CEI32–35: cantidad 2 con 2, 0, 1 o 3 fichas; una ficha incompleta. | Éxito solo con dos fichas completas; CSI10 en los demás. |
 | **CP10 / Media** | CEV36 y CEI37–38: `"Ana Pérez"`; `"   "`; `None`; número en lugar de texto. | Éxito o CSI11. |
 | **CP11 / Alta** | CEV39 y CEI40–43: DNI numérico; vacío; `"30A23456"`; 0; −1; booleano. | Éxito o CSI12. El DNI negativo ya tiene prueba Red. |
-| **CP12 / Alta** | CEV44–46, CEI47–51: Safari/Jardinería edad 0; Tirolesa 7/8; Palestra 11/12; edad ausente, negativa o no entera. | Éxito en 0/8/12 según actividad; CSI13 o CSI14 en inválidos. La edad 0 en Safari/Jardinería requiere corregir el código si se adopta [DEC]. |
+| **CP12 / Alta** | CEV44–46, CEI47–51: Safari/Jardinería edad 0; Tirolesa 7/8; Palestra 11/12; edad ausente, negativa o no entera. | Éxito en 0/8/12 según actividad; CSI13 o CSI14 en inválidos. |
 | **CP13 / Alta** | CEV52–53 y CEI54–56: seis talles permitidos; omisión en Safari/Jardinería; omisión, `"XXXL"` o número en Tirolesa/Palestra. | Éxito o CSI15. `"XXXL"` ya tiene dos casos Red. |
 | **CP14 / Alta** | CEV57 y CEI58–60: acepta versión propia; rechaza; no responde; acepta ID de otra actividad. | Éxito solo con aceptación correspondiente; CSI16 en el resto. El servicio admite un ID de términos además del booleano de aceptación. |
 | **CP15 / Alta** | CEV61–62 y CEI63–64: sin reserva previa; reserva a otra hora; reserva a la misma hora; DNI duplicado en la solicitud. | Éxito en los dos primeros; CSI17 y CSI19 en los demás. El duplicado en la solicitud ya tiene prueba Red. |
@@ -113,13 +113,13 @@ with pytest.raises(HorarioInvalido):
     servicio.seleccionar_horario(turno, datetime(2026, 10, 20, 14, 45, 1))
 ```
 
-## 4. Decisiones pendientes antes de completar los tests
+## 4. Decisiones del grupo y puntos pendientes de validación
 
-1. **Validación docente/PO de los cuatro textos de términos.** La FAQ exige enviarlos para validación. Hasta contar con ese visto bueno, el test de ID/version de términos sería una propuesta del grupo, no una regla oficial.
-2. **Actividad sin cargo adicional.** La propuesta de `$0` permite cumplir el requisito de subtotal y total sin inventar un pago ajeno a la historia. Si se asignan precios, debe cambiarse CSV09 y CP17 antes de escribir sus asserts.
-3. **Edad 0 en Safari/Jardinería.** La interpretación de «todas las edades» incluye bebés menores de un año. Conviene acordarlo explícitamente porque el servicio actual exige edad mayor que 0.
-4. **Formato de correo y nombres.** La FAQ no da una expresión regular ni longitud máxima. La matriz propone validaciones mínimas y evita reglas arbitrarias.
-5. **Interfaz móvil completa.** El servicio ya genera QR SVG reales y un fragmento HTML que los muestra. El proyecto todavía no contiene una aplicación móvil ni el calendario visual, por lo que las pruebas de pantalla completas requieren otra capa de interfaz.
+1. **Validación docente/PO de los cuatro textos de términos.** La FAQ exige enviarlos para validación. Hasta contar con ese visto bueno, los textos e ID/version son propuestas del grupo, no reglas oficiales.
+2. **Actividad sin cargo adicional.** El grupo decidió que la inscripción está incluida con la entrada. Los subtotales y el total adicionales son `$0`. Si la cátedra define precios de actividades, habrá que actualizar CSV09 y CP17.
+3. **Edad 0 en Safari/Jardinería.** El grupo confirmó que «todas las edades» incluye bebés menores de un año. Tirolesa y Palestra conservan los límites de 8 y 12 años fijados en la FAQ.
+4. **Formato de correo y nombres.** El grupo confirmó validaciones mínimas sin reglas arbitrarias de longitud.
+5. **Interfaz móvil completa.** El servicio genera QR SVG reales y un fragmento HTML que los muestra. La aplicación y el frontend quedan para el equipo que los implementará; las pruebas de pantalla requieren esa capa de interfaz.
 6. **Falla técnica del envío de correo.** La FAQ admite simular el envío, pero no define reintentos ni si la reserva se revierte cuando el emisor falla. No se agregará una clase de rechazo con rollback sin decidir antes esa política.
 
 ### Estado respecto del repositorio actual
