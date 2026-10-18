@@ -7,6 +7,7 @@ name = "ecoharmony-park-tdd"
 version = "0.1.0"
 description = "Práctico 6 - fase Red de la historia Inscribirme a actividad"
 requires-python = ">=3.11"
+dependencies = ["reportlab>=4,<5"]
 
 [tool.pytest.ini_options]
 addopts = "-ra"

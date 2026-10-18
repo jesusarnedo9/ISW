@@ -10,6 +10,7 @@ from .inscripciones import (
     ServicioInscripcion,
     SinCupo,
     SolicitudInscripcion,
+    TerminosActividad,
     TerminosNoAceptados,
     Visitante,
 )
@@ -24,6 +25,7 @@ __all__ = [
     "ServicioInscripcion",
     "SinCupo",
     "SolicitudInscripcion",
+    "TerminosActividad",
     "TerminosNoAceptados",
     "Visitante",
 ]
