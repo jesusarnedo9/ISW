@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ecoharmony-park-tdd"
+version = "0.1.0"
+description = "Práctico 6 - fase Red de la historia Inscribirme a actividad"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
