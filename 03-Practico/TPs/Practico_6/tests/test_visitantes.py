@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import pytest
 
 from ecoharmony_park import Actividad, DatosVisitanteInvalidos, Visitante
@@ -94,8 +96,6 @@ def test_rechazar_cantidad_de_personas_cero(servicio):
         servicio.validar_participantes(0, [])
 
 
-#### Rami ####
-
 @pytest.mark.parametrize("dni", [
     "",
     "   ",
@@ -103,7 +103,6 @@ def test_rechazar_cantidad_de_personas_cero(servicio):
     "30123A56"
 ])
 def test_rechazar_dni_invalido(servicio, dni):
-    # Precondiciones
     visitante = Visitante(
         nombre="Ana",
         dni=dni,
@@ -111,7 +110,6 @@ def test_rechazar_dni_invalido(servicio, dni):
         talla="M"
     )
 
-    # Pasos y resultado
     with pytest.raises(DatosVisitanteInvalidos):
         servicio.validar_visitante(
             visitante,
@@ -119,9 +117,8 @@ def test_rechazar_dni_invalido(servicio, dni):
         )
 
 
-@pytest.mark.parametrize("edad", [-10, -1, 0])
-def test_rechazar_edad_no_positiva(servicio, edad):
-    # Precondiciones
+@pytest.mark.parametrize("edad", [-10, -1])
+def test_rechazar_edad_negativa(servicio, edad):
     visitante = Visitante(
         nombre="Ana",
         dni=30123456,
@@ -129,11 +126,10 @@ def test_rechazar_edad_no_positiva(servicio, edad):
         talla="M"
     )
 
-    # Pasos y resultado
     with pytest.raises(DatosVisitanteInvalidos):
         servicio.validar_visitante(
             visitante,
-            Actividad.TIROLESA
+            Actividad.SAFARI
         )
 
 
@@ -143,7 +139,6 @@ def test_rechazar_edad_no_positiva(servicio, edad):
     "\t"
 ])
 def test_rechazar_nombre_solo_espacios(servicio, nombre):
-    # Precondiciones
     visitante = Visitante(
         nombre=nombre,
         dni=30123456,
@@ -151,7 +146,6 @@ def test_rechazar_nombre_solo_espacios(servicio, nombre):
         talla="M"
     )
 
-    # Pasos y resultado
     with pytest.raises(DatosVisitanteInvalidos):
         servicio.validar_visitante(
             visitante,
@@ -163,10 +157,8 @@ def test_rechazar_nombre_solo_espacios(servicio, nombre):
 def test_rechazar_cantidad_participantes_negativa(
     servicio, cantidad
 ):
-    # Precondiciones
     visitantes = []
 
-    # Pasos y resultado
     with pytest.raises(DatosVisitanteInvalidos):
         servicio.validar_participantes(
             cantidad,
@@ -177,7 +169,6 @@ def test_rechazar_cantidad_participantes_negativa(
 def test_rechazar_visitantes_superiores_a_cantidad(
     servicio, visitante_valido
 ):
-    # Precondiciones
     cantidad_personas = 1
 
     segundo_visitante = Visitante(
@@ -192,9 +183,56 @@ def test_rechazar_visitantes_superiores_a_cantidad(
         segundo_visitante
     ]
 
-    # Pasos y resultado
     with pytest.raises(DatosVisitanteInvalidos):
         servicio.validar_participantes(
             cantidad_personas,
             visitantes
         )
+
+
+@pytest.mark.parametrize("actividad", [Actividad.TIROLESA, Actividad.PALESTRA])
+def test_rechaza_talle_fuera_del_catalogo(servicio, visitante_valido, actividad):
+    visitante = replace(visitante_valido, talla="XXXL")
+
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_visitante(visitante, actividad)
+
+
+def test_rechaza_dni_negativo(servicio, visitante_valido):
+    visitante = replace(visitante_valido, dni=-1)
+
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_visitante(visitante, Actividad.TIROLESA)
+
+
+@pytest.mark.parametrize("cantidad", [None, 1.5, "dos", True])
+def test_rechaza_cantidad_no_entera(servicio, cantidad):
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_participantes(cantidad, [])
+
+
+@pytest.mark.parametrize("visitantes", [None, "Ana", [], [None]])
+def test_rechaza_conjunto_de_visitantes_malformado(servicio, visitantes):
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_participantes(1, visitantes)
+
+
+@pytest.mark.parametrize("dni", [0, "0", " 30123456 ", True])
+def test_rechaza_dni_no_positivo_o_con_formato_invalido(servicio, visitante_valido, dni):
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_visitante(replace(visitante_valido, dni=dni), Actividad.TIROLESA)
+
+
+def test_acepta_dni_numerico_ingresado_como_texto(servicio, visitante_valido):
+    assert servicio.validar_visitante(
+        replace(visitante_valido, dni="30123456"), Actividad.TIROLESA
+    ) is None
+
+
+def test_rechaza_edad_no_informada(servicio, visitante_valido):
+    with pytest.raises(DatosVisitanteInvalidos):
+        servicio.validar_visitante(replace(visitante_valido, edad=None), Actividad.TIROLESA)
+
+
+def test_talle_no_se_valida_si_la_actividad_no_lo_requiere(servicio, visitante_valido):
+    assert servicio.validar_visitante(replace(visitante_valido, talla=42), Actividad.SAFARI) is None

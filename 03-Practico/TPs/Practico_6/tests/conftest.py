@@ -7,7 +7,6 @@ from ecoharmony_park import Actividad, ServicioInscripcion, Visitante
 
 @pytest.fixture
 def ahora() -> datetime:
-    # Martes 20/10/2026 a las 10:00.
     return datetime(2026, 10, 20, 10, 0)
 
 
@@ -29,4 +28,3 @@ def servicio(horario_seleccionado: datetime) -> ServicioInscripcion:
             (Actividad.SAFARI, horario_seleccionado): 0,
         }
     )
-

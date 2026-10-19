@@ -95,7 +95,7 @@ class ServicioInscripcion:
     EDAD_MINIMA = {Actividad.TIROLESA: 8, Actividad.PALESTRA: 12}
     ACTIVIDADES_CON_VESTIMENTA = (Actividad.TIROLESA, Actividad.PALESTRA)
     TALLES = frozenset({"XS", "S", "M", "L", "XL", "XXL"})
-    PRECIO_ADICIONAL = 0  # Decisión del grupo: incluido con la entrada.
+    PRECIO_ADICIONAL = 0
     CUPO_MAXIMO = {
         Actividad.SAFARI: 8,
         Actividad.TIROLESA: 10,
@@ -203,8 +203,6 @@ class ServicioInscripcion:
             or visitante.edad < 0
         ):
             raise DatosVisitanteInvalidos("La edad debe ser un entero no negativo")
-        if visitante.edad == 0 and actividad in self.EDAD_MINIMA:
-            raise DatosVisitanteInvalidos("La edad no alcanza el mínimo de la actividad")
         if actividad in self.ACTIVIDADES_CON_VESTIMENTA:
             if not isinstance(visitante.talla, str) or not visitante.talla.strip():
                 raise DatosVisitanteInvalidos("Esta actividad requiere talle de vestimenta")

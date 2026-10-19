@@ -18,8 +18,6 @@ def test_seleccionar_un_horario_en_el_pasado(servicio, ahora):
 
 @pytest.mark.parametrize("hora", range(9, 18))
 def test_aceptar_cada_turno_horario_disponible(servicio, hora):
-    # Se parte de las 8:00 para que todos los turnos 9-17 sean futuros y con
-    # la anticipación mínima exigida.
     ahora = datetime(2026, 10, 20, 8, 0)
     turno = datetime(2026, 10, 20, hora, 0)
 
@@ -76,3 +74,33 @@ def test_rechazar_inscripcion_a_menos_de_15_minutos_del_turno(servicio):
     with pytest.raises(HorarioInvalido):
         servicio.seleccionar_horario(turno, ahora)
 
+
+def test_rechaza_horario_sin_seleccionar(servicio, ahora):
+    with pytest.raises(HorarioInvalido):
+        servicio.seleccionar_horario(None, ahora)
+
+
+@pytest.mark.parametrize("anticipacion", [timedelta(hours=24), timedelta(minutes=15)])
+def test_permite_limites_exactos_de_reserva(servicio, horario_seleccionado, anticipacion):
+    assert servicio.seleccionar_horario(horario_seleccionado, horario_seleccionado - anticipacion) == horario_seleccionado
+
+
+@pytest.mark.parametrize(
+    "anticipacion", [timedelta(hours=24, seconds=1), timedelta(minutes=14, seconds=59)]
+)
+def test_rechaza_un_segundo_fuera_de_la_ventana(servicio, horario_seleccionado, anticipacion):
+    with pytest.raises(HorarioInvalido):
+        servicio.seleccionar_horario(horario_seleccionado, horario_seleccionado - anticipacion)
+
+
+@pytest.mark.parametrize(
+    ("dia", "habilitado"),
+    [
+        (datetime(2026, 10, 20), True),
+        (datetime(2026, 10, 26), False),
+        (datetime(2026, 12, 25), False),
+        (datetime(2027, 1, 1), False),
+    ],
+)
+def test_calendario_deshabilita_dias_cerrados(servicio, dia, habilitado):
+    assert servicio.fecha_habilitada(dia) is habilitado

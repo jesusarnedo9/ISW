@@ -7,9 +7,10 @@ La [matriz de equivalencias](Matriz_equivalencias_inscripcion_actividad.md) enum
 ## Ciclo Red → Green → Refactor
 
 1. La rama comenzó con **79 pruebas aprobadas y 7 Red**. Esas siete documentaban validaciones faltantes de actividad, talle, DNI, duplicados y horario.
-2. Se agregaron casos de la matriz en `tests/test_matriz_pendientes.py`: el checkpoint **Red** tuvo **93 aprobadas y 35 fallidas**. El commit Red conserva pruebas y matriz sin modificar `src/`.
+2. Se agregaron casos de la matriz: el checkpoint **Red** tuvo **93 aprobadas y 35 fallidas**. El commit Red conserva pruebas y matriz sin modificar `src/`.
 3. En **Green** se implementaron las reglas y el comprobante. La suite pasó a **128 aprobadas**.
 4. En **Refactor** se separó la validación de la solicitud de la construcción de la confirmación y se normalizaron los DNI de reservas existentes. Un caso adicional capturó los ceros iniciales y se completaron clases que no estaban aisladas: **134 aprobadas**.
+5. Se precisó la regla de edad: **0** es un dato válido para Safari y Jardinería; en Tirolesa y Palestra incumple la edad mínima. Las pruebas quedaron reunidas por tema y la suite actual tiene **135 casos aprobados**.
 
 ## Ejecutar las pruebas
 
@@ -36,6 +37,4 @@ python -m pytest -q
 - `tests/test_actividades.py`: catálogo, oferta, cupos y edades mínimas.
 - `tests/test_visitantes.py`: datos, cantidad y talles.
 - `tests/test_inscripcion.py`: términos, solapamientos y confirmación.
-- `tests/test_red_faltantes.py`: siete casos Red del primer ciclo.
-- `tests/test_matriz_pendientes.py`: casos complementarios derivados de la matriz, incluidas las salidas.
 

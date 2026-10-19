@@ -124,4 +124,4 @@ with pytest.raises(HorarioInvalido):
 
 ### Estado respecto del repositorio actual
 
-La rama `test/inscripciones-red-faltantes` partió de **79 aprobadas y 7 Red**. Al agregar los casos de esta matriz, el checkpoint Red quedó en **93 aprobadas y 35 Red**. Tras Green, un caso adicional sobre DNI con ceros iniciales y casos de cobertura de clases antes implícitas, la suite completa queda en **134 aprobadas**. Los cambios están separados en commits Red, Green y Refactor para que se vea el ciclo TDD.
+La rama `test/inscripciones-red-faltantes` partió de **79 aprobadas y 7 Red**. Al agregar los casos de esta matriz, el checkpoint Red quedó en **93 aprobadas y 35 Red**. Tras Green, un caso adicional sobre DNI con ceros iniciales y casos de cobertura de clases antes implícitas, la suite quedó en **134 aprobadas**. La corrección posterior del caso edad 0 y la organización de los archivos dejan **135 aprobadas**. Los cambios del ciclo inicial están separados en commits Red, Green y Refactor para que se vea el proceso.
