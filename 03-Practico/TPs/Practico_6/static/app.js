@@ -412,9 +412,8 @@
             <label class="form-label">Edad:</label>
             <input type="number" class="form-control input-edad" value="${val.edad}" min="0" max="120" placeholder="Ej. 25" required>
           </div>
-          ${
-            requiereVestimenta
-              ? `
+          ${requiereVestimenta
+          ? `
             <div class="form-group field-talla">
               <label class="form-label">Talle de Vestimenta:</label>
               <select class="form-control select-talla" required>
@@ -423,8 +422,8 @@
               </select>
             </div>
             `
-              : ""
-          }
+          : ""
+        }
         </div>
       `;
 
@@ -594,12 +593,16 @@
         state.cantidadPersonas = 1;
         dom.cantidadPersonas.value = 1;
         renderizarFichasVisitantes();
+        dom.visitantesFichas.querySelectorAll(".select-talla").forEach((sel) => {
+          sel.value = "M";
+        });
         dom.checkTerminos.checked = true;
         break;
 
       case "2": // CP2: Sin cupo (Palestra a las 15:00 sembrada con 0 cupos)
         const maniana = new Date();
         maniana.setDate(maniana.getDate() + 1);
+        while (maniana.getDay() === 1) maniana.setDate(maniana.getDate() + 1); // evitar lunes
         const manianaStr = `${maniana.getFullYear()}-${String(maniana.getMonth() + 1).padStart(2, "0")}-${String(maniana.getDate()).padStart(2, "0")}`;
         dom.fechaVisita.value = manianaStr;
         state.fechaSeleccionada = manianaStr;
@@ -614,7 +617,7 @@
         dom.fechaVisita.value = fechaStr;
         state.fechaSeleccionada = fechaStr;
         await consultarCupos();
-        seleccionarTurno("11:00");
+        seleccionarTurno("15:00");
         seleccionarActividad("Safari");
         state.cantidadPersonas = 1;
         dom.cantidadPersonas.value = 1;

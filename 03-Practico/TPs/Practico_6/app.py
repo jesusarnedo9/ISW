@@ -58,8 +58,10 @@ def crear_servicio_inicial() -> ServicioInscripcion:
                 # Configurar disponibilidad estándar
                 cupos[(actividad, turno)] = cupo_max
 
-    # Sembrar intencionalmente un caso de cupo agotado para pruebas (Palestra a las 15:00 de mañana)
+    # Sembrar intencionalmente un caso de cupo agotado para pruebas (Palestra a las 15:00 del próximo día abierto)
     maniana = ahora_referencia + timedelta(days=1)
+    while maniana.weekday() == 0:  # evitar lunes si el siguiente día cae lunes
+        maniana += timedelta(days=1)
     turno_agotado = datetime(maniana.year, maniana.month, maniana.day, 15, 0)
     cupos[(Actividad.PALESTRA, turno_agotado)] = 0
 
