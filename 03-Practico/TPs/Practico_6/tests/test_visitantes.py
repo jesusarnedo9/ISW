@@ -119,13 +119,13 @@ def test_rechazar_dni_invalido(servicio, dni):
         )
 
 
-@pytest.mark.parametrize("edad", [-10, -1, 0])
-def test_rechazar_edad_no_positiva(servicio, edad):
+@pytest.mark.parametrize("edad", [-10, -5, -1])
+def test_rechazar_edad_negativa(servicio, edad):
     # Precondiciones
     visitante = Visitante(
         nombre="Ana",
         dni=30123456,
-        edad=edad, # Esta variable ahora debería recibir valores como -1, -5, etc.
+        edad=edad, 
         talla="M"
     )
 
@@ -135,7 +135,6 @@ def test_rechazar_edad_no_positiva(servicio, edad):
             visitante,
             Actividad.TIROLESA
         )
-
 
 @pytest.mark.parametrize("nombre", [
     " ",
