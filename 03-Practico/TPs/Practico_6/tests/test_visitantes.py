@@ -125,7 +125,7 @@ def test_rechazar_edad_no_positiva(servicio, edad):
     visitante = Visitante(
         nombre="Ana",
         dni=30123456,
-        edad=edad,
+        edad=edad, # Esta variable ahora debería recibir valores como -1, -5, etc.
         talla="M"
     )
 
