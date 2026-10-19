@@ -159,6 +159,8 @@ class ServicioInscripcion:
     def seleccionar_horario(self, horario: datetime, ahora: datetime) -> datetime:
         if not isinstance(horario, datetime) or not isinstance(ahora, datetime):
             raise HorarioInvalido("Debe seleccionar un horario válido")
+        if not self.fecha_habilitada(horario):
+            raise HorarioInvalido("El parque permanece cerrado ese día")
         anticipacion = horario - ahora
         if anticipacion < self.ANTICIPACION_MINIMA:
             raise HorarioInvalido("El horario ya pasó o no cumple la anticipación mínima")
@@ -168,8 +170,6 @@ class ServicioInscripcion:
             raise HorarioInvalido("Los turnos comienzan en hora exacta")
         if not self.HORA_APERTURA <= horario.hour <= self.HORA_CIERRE:
             raise HorarioInvalido("El turno está fuera del horario de atención")
-        if not self.fecha_habilitada(horario):
-            raise HorarioInvalido("El parque permanece cerrado ese día")
         return horario
 
     def seleccionar_actividad(

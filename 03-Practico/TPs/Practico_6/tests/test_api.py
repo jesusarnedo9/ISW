@@ -46,6 +46,40 @@ def test_api_cupos_fecha_valida(client):
     assert "parque_abierto" in data
 
 
+def test_api_cupos_de_un_lunes_prioriza_el_cierre_del_parque(client):
+    hoy = datetime.now()
+    lunes = hoy.date() + timedelta(days=14 - hoy.weekday())
+    res = client.get(f"/api/cupos?fecha={lunes.isoformat()}&ahora={hoy.isoformat()}")
+
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["parque_abierto"] is False
+    assert all(turno["motivo"] == data["motivo_cierre"] for turno in data["turnos"].values())
+
+
+def test_api_distingue_actividad_no_ofrecida_de_cupo_agotado(client):
+    fecha_str, ahora_str = fecha_y_horario_valido()
+    turno = datetime.fromisoformat(f"{fecha_str}T10:00:00")
+    flask_app_module.servicio.cupos.pop((flask_app_module.Actividad.SAFARI, turno))
+    flask_app_module.servicio.cupos[(flask_app_module.Actividad.PALESTRA, turno)] = 0
+
+    res = client.get(f"/api/cupos?fecha={fecha_str}&ahora={ahora_str}")
+
+    assert res.status_code == 200
+    turno_info = res.get_json()["turnos"]["10:00"]
+    assert turno_info["habilitado"] is True
+    assert turno_info["actividades"]["Safari"] == {
+        "disponibles": 0,
+        "agotado": False,
+        "ofrecida": False,
+    }
+    assert turno_info["actividades"]["Palestra"] == {
+        "disponibles": 0,
+        "agotado": True,
+        "ofrecida": True,
+    }
+
+
 def test_api_inscribir_exitoso(client):
     fecha_str, ahora_str = fecha_y_horario_valido()
     payload = {
@@ -68,6 +102,26 @@ def test_api_inscribir_exitoso(client):
     assert "numero_orden" in data["confirmacion"]
     assert len(data["confirmacion"]["codigos_qr"]) == 1
     assert data["confirmacion"]["codigos_qr"][0].startswith("data:image/svg+xml;base64,")
+
+
+def test_api_inscribir_sin_correo_no_genera_reserva(client):
+    fecha_str, ahora_str = fecha_y_horario_valido()
+    payload = {
+        "actividad": "Safari",
+        "fecha": fecha_str,
+        "hora": "10:00",
+        "cantidad_personas": 1,
+        "visitantes": [{"nombre": "Ana Pérez", "dni": 30123456, "edad": 25}],
+        "acepta_terminos": True,
+        "id_terminos_aceptados": "TYC-SAF-v1",
+        "ahora": ahora_str,
+    }
+
+    res = client.post("/api/inscribir", json=payload)
+
+    assert res.status_code == 422
+    assert res.get_json()["tipo_error"] == "DatosVisitanteInvalidos"
+    assert client.get("/api/correos").get_json()["total_enviados"] == 0
 
 
 def test_api_inscribir_sin_aceptar_terminos(client):

@@ -11,7 +11,7 @@ El práctico incluye el servicio de inscripción en Python, pruebas automatizada
 3. En **Green** se implementaron las reglas y el comprobante. La suite pasó a **128 aprobadas**.
 4. En **Refactor** se separó la validación de la solicitud de la construcción de la confirmación y se normalizaron los DNI de reservas existentes. Un caso adicional capturó los ceros iniciales y se completaron clases que no estaban aisladas: **134 aprobadas**.
 5. Se precisó la regla de edad: **0** es un dato válido para Safari y Jardinería; en Tirolesa y Palestra incumple la edad mínima. Las pruebas quedaron reunidas por tema.
-6. Se integró la interfaz web y sus pruebas de API. La suite completa tiene **147 casos aprobados**.
+6. Se integró la interfaz web y sus pruebas de API. La suite completa verifica tanto el dominio como la API.
 
 ## Ejecutar las pruebas
 

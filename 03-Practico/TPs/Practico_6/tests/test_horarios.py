@@ -47,6 +47,14 @@ def test_rechazar_un_lunes_por_cierre_del_parque(servicio):
         servicio.seleccionar_horario(lunes, ahora)
 
 
+def test_rechazar_un_lunes_lejano_por_cierre_del_parque(servicio):
+    lunes = datetime(2026, 10, 26, 15, 0)
+    ahora = lunes - timedelta(days=7)
+
+    with pytest.raises(HorarioInvalido, match="cerrado"):
+        servicio.seleccionar_horario(lunes, ahora)
+
+
 @pytest.mark.parametrize(
     "feriado",
     [datetime(2026, 12, 25, 15, 0), datetime(2027, 1, 1, 15, 0)],

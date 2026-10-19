@@ -237,13 +237,14 @@
       dom.turnosGrid.appendChild(btn);
     });
 
-    // Si el turno seleccionado ya no es válido, autoseleccionar el primero disponible
-    if ((!state.turnoSeleccionado || !state.cuposTurnos[state.turnoSeleccionado]?.habilitado) && primerTurnoHabilitado) {
-      seleccionarTurno(primerTurnoHabilitado);
+    if (!state.turnoSeleccionado || !state.cuposTurnos[state.turnoSeleccionado]?.habilitado) {
+      state.turnoSeleccionado = null;
+      if (primerTurnoHabilitado) seleccionarTurno(primerTurnoHabilitado);
     }
   }
 
   function seleccionarTurno(horaStr) {
+    if (!state.cuposTurnos[horaStr]?.habilitado) return;
     state.turnoSeleccionado = horaStr;
 
     // Actualizar clase seleccionada en pills
@@ -252,6 +253,16 @@
     });
 
     actualizarTarjetasActividades();
+  }
+
+  function motivoSinHorarioDisponible() {
+    if (!state.parqueAbierto) return state.motivoCierre || "El parque está cerrado ese día";
+    const turnos = Object.values(state.cuposTurnos);
+    if (!turnos.length) return "No hay turnos disponibles para esta fecha";
+    const motivo = turnos[0].motivo;
+    return motivo && turnos.every((turno) => turno.motivo === motivo)
+      ? motivo
+      : "No hay turnos reservables para esta fecha";
   }
 
   function renderizarGrillaActividades() {
@@ -307,26 +318,25 @@
       const pill = document.getElementById(`cupo-pill-${act.id}`);
       if (!card || !pill) return;
 
-      let cupos = 0;
-      let turnoHabilitado = state.parqueAbierto && turnoData && turnoData.habilitado;
+      const turnoHabilitado = state.parqueAbierto && turnoData?.habilitado;
+      const actividadEnTurno = turnoData?.actividades?.[act.nombre];
+      const ofrecida = actividadEnTurno?.ofrecida === true;
+      const cupos = ofrecida ? actividadEnTurno.disponibles : 0;
+      const noDisponible = !turnoHabilitado || !ofrecida || cupos <= 0;
 
-      if (turnoHabilitado && turnoData.actividades && turnoData.actividades[act.nombre]) {
-        cupos = turnoData.actividades[act.nombre].disponibles;
-      }
+      pill.textContent = !turnoHabilitado
+        ? (turnoData?.motivo || motivoSinHorarioDisponible())
+        : !ofrecida
+          ? "No se ofrece en este horario"
+          : cupos > 0 ? `${cupos} cupos disponibles` : "Agotado";
 
-      const agotado = cupos <= 0 || !turnoHabilitado;
-
-      pill.textContent = turnoHabilitado
-        ? (cupos > 0 ? `${cupos} cupos disponibles` : "Agotado")
-        : "No disponible";
-
-      pill.className = `cupo-pill ${agotado ? "agotado" : "disponible"}`;
-      card.classList.toggle("disabled", agotado);
+      pill.className = `cupo-pill ${noDisponible ? "agotado" : "disponible"}`;
+      card.classList.toggle("disabled", noDisponible);
 
       // Si la actividad seleccionada quedó agotada, buscar otra disponible
       if (state.actividadSeleccionada === act.nombre) {
         card.classList.add("selected");
-        if (agotado) {
+        if (noDisponible) {
           card.classList.remove("selected");
         }
       } else {
@@ -338,6 +348,9 @@
   }
 
   function seleccionarActividad(nombreActividad) {
+    if (state.actividadSeleccionada !== nombreActividad) {
+      dom.checkTerminos.checked = false;
+    }
     state.actividadSeleccionada = nombreActividad;
 
     dom.actividadesGrid.querySelectorAll(".actividad-card").forEach((c) => {
@@ -446,7 +459,12 @@
     ocultarError();
 
     if (!state.turnoSeleccionado) {
-      mostrarError("Debe seleccionar un turno horario.");
+      mostrarError(motivoSinHorarioDisponible());
+      return;
+    }
+
+    if (!state.cuposTurnos[state.turnoSeleccionado]?.habilitado) {
+      mostrarError(state.cuposTurnos[state.turnoSeleccionado]?.motivo || motivoSinHorarioDisponible());
       return;
     }
 

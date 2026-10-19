@@ -185,22 +185,24 @@ def consultar_cupos():
         es_valido_horario = True
         motivo_horario = None
         anticipacion = turno - ahora
-        if anticipacion < ServicioInscripcion.ANTICIPACION_MINIMA:
+        if not abierto:
+            es_valido_horario = False
+            motivo_horario = motivo_cierre
+        elif anticipacion < ServicioInscripcion.ANTICIPACION_MINIMA:
             es_valido_horario = False
             motivo_horario = "Turno pasado o no cumple la anticipación mínima de 15 minutos"
         elif anticipacion > ServicioInscripcion.ANTICIPACION_MAXIMA:
             es_valido_horario = False
             motivo_horario = "Supera la anticipación máxima de 24 horas"
-        elif not abierto:
-            es_valido_horario = False
-            motivo_horario = motivo_cierre
 
         actividades_cupos = {}
         for act in Actividad:
+            ofrecida = (act, turno) in servicio.cupos
             disponibles = servicio.cupos_disponibles(act, turno)
             actividades_cupos[act.value] = {
                 "disponibles": disponibles,
-                "agotado": disponibles <= 0,
+                "agotado": ofrecida and disponibles <= 0,
+                "ofrecida": ofrecida,
             }
 
         disponibilidad_turnos[h_key] = {
@@ -297,7 +299,7 @@ def procesar_inscripcion():
         acepta_terminos = False
 
     id_terminos = datos.get("id_terminos_aceptados")
-    email = datos.get("email", "visitante@example.com")
+    email = datos.get("email")
 
     solicitud = SolicitudInscripcion(
         actividad=actividad_encontrada,
