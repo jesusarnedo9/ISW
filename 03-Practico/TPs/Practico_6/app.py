@@ -257,9 +257,22 @@ def procesar_inscripcion():
         }), 400
 
     # 3. Parsear participantes
-    visitantes_raw = datos.get("visitantes", [])
+    visitantes_raw = datos.get("visitantes")
+    if not isinstance(visitantes_raw, list):
+        return jsonify({
+            "exito": False,
+            "tipo_error": "DatosVisitanteInvalidos",
+            "mensaje": "Debe informar una lista de visitantes",
+        }), 422
+
     visitantes_objetos = []
     for v in visitantes_raw:
+        if not isinstance(v, dict):
+            return jsonify({
+                "exito": False,
+                "tipo_error": "DatosVisitanteInvalidos",
+                "mensaje": "Cada participante debe tener una ficha válida",
+            }), 422
         visitantes_objetos.append(
             Visitante(
                 nombre=v.get("nombre"),
@@ -269,8 +282,20 @@ def procesar_inscripcion():
             )
         )
 
-    cantidad_personas = datos.get("cantidad_personas", len(visitantes_objetos))
-    acepta_terminos = bool(datos.get("acepta_terminos", False))
+    cantidad_personas = datos.get("cantidad_personas")
+    if cantidad_personas is None:
+        cantidad_personas = len(visitantes_objetos)
+
+    val_terminos = datos.get("acepta_terminos")
+    if isinstance(val_terminos, bool):
+        acepta_terminos = val_terminos
+    elif isinstance(val_terminos, str):
+        acepta_terminos = val_terminos.strip().lower() in ("true", "1", "t", "yes", "si", "sí")
+    elif isinstance(val_terminos, (int, float)):
+        acepta_terminos = (val_terminos == 1)
+    else:
+        acepta_terminos = False
+
     id_terminos = datos.get("id_terminos_aceptados")
     email = datos.get("email", "visitante@example.com")
 

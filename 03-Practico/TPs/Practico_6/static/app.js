@@ -50,6 +50,16 @@
     btnCerrarCorreos: document.getElementById("btn-cerrar-correos"),
   };
 
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   async function init() {
     configurarEventos();
     await cargarConfiguracion();
@@ -392,7 +402,7 @@
       card.className = "visitante-card";
       card.dataset.index = i;
 
-      let opcionesTalles = talles.map((t) => `<option value="${t}" ${t === val.talla ? "selected" : ""}>${t}</option>`).join("");
+      let opcionesTalles = talles.map((t) => `<option value="${escapeHtml(t)}" ${t === val.talla ? "selected" : ""}>${escapeHtml(t)}</option>`).join("");
 
       card.innerHTML = `
         <div class="visitante-header">
@@ -402,15 +412,15 @@
         <div class="visitante-grid">
           <div class="form-group">
             <label class="form-label">Nombre y Apellido:</label>
-            <input type="text" class="form-control input-nombre" value="${val.nombre}" placeholder="Ej. Juan Pérez" required>
+            <input type="text" class="form-control input-nombre" value="${escapeHtml(val.nombre)}" placeholder="Ej. Juan Pérez" required>
           </div>
           <div class="form-group">
             <label class="form-label">DNI (solo números):</label>
-            <input type="text" class="form-control input-dni" value="${val.dni}" placeholder="Ej. 30123456" inputmode="numeric" required>
+            <input type="text" class="form-control input-dni" value="${escapeHtml(val.dni)}" placeholder="Ej. 30123456" inputmode="numeric" required>
           </div>
           <div class="form-group">
             <label class="form-label">Edad:</label>
-            <input type="number" class="form-control input-edad" value="${val.edad}" min="0" max="120" placeholder="Ej. 25" required>
+            <input type="number" class="form-control input-edad" value="${escapeHtml(val.edad)}" min="0" max="120" placeholder="Ej. 25" required>
           </div>
           ${requiereVestimenta
           ? `
@@ -512,7 +522,7 @@
       qrCardsHtml = confirmacion.codigos_qr
         .map((uri, idx) => `
           <div class="qr-item">
-            <img src="${uri}" alt="Código QR Participante ${idx + 1}">
+            <img src="${escapeHtml(uri)}" alt="Código QR Participante ${idx + 1}">
             <span class="qr-caption">Pase QR #${idx + 1}</span>
           </div>
         `)
@@ -521,11 +531,11 @@
 
     dom.modalComprobanteBody.innerHTML = `
       <div class="voucher-card">
-        <div class="voucher-order-num">ORDEN: ${confirmacion.numero_orden}</div>
-        <div class="voucher-summary">${confirmacion.resumen}</div>
+        <div class="voucher-order-num">ORDEN: ${escapeHtml(confirmacion.numero_orden)}</div>
+        <div class="voucher-summary">${escapeHtml(confirmacion.resumen)}</div>
         <div class="voucher-total-row">
           <span>Total Adicional a la Entrada:</span>
-          <span>$${confirmacion.total} (Incluido)</span>
+          <span>$${escapeHtml(confirmacion.total)} (Incluido)</span>
         </div>
       </div>
       <div>
@@ -554,11 +564,11 @@
           item.className = "email-item";
           item.innerHTML = `
             <div class="email-meta">
-              <span>Para: <span class="email-destinatario">${c.destinatario}</span></span>
-              <span>Orden: <strong>${c.numero_orden}</strong></span>
+              <span>Para: <span class="email-destinatario">${escapeHtml(c.destinatario)}</span></span>
+              <span>Orden: <strong>${escapeHtml(c.numero_orden)}</strong></span>
             </div>
-            <div class="email-body">${c.resumen}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Adjuntos: ${c.cantidad_qr} código(s) QR generado(s).</div>
+            <div class="email-body">${escapeHtml(c.resumen)}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Adjuntos: ${escapeHtml(c.cantidad_qr)} código(s) QR generado(s).</div>
           `;
           dom.correosListaContainer.appendChild(item);
         });

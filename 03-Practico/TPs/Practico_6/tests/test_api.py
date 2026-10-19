@@ -14,6 +14,19 @@ def client():
         yield client
 
 
+def fecha_y_horario_valido():
+    """Calcula una fecha habilitada y un momento simulado válido dentro del rango de cupos generados."""
+    hoy = datetime.now().date()
+    for offset in range(1, 6):
+        candidato = hoy + timedelta(days=offset)
+        if flask_app_module.servicio.fecha_habilitada(candidato):
+            fecha_str = candidato.strftime("%Y-%m-%d")
+            ahora_str = f"{fecha_str}T08:00:00"
+            return fecha_str, ahora_str
+    fecha_str = hoy.strftime("%Y-%m-%d")
+    return fecha_str, f"{fecha_str}T08:00:00"
+
+
 def test_api_config(client):
     res = client.get("/api/config")
     assert res.status_code == 200
@@ -25,8 +38,8 @@ def test_api_config(client):
 
 
 def test_api_cupos_fecha_valida(client):
-    maniana = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
-    res = client.get(f"/api/cupos?fecha={maniana}")
+    fecha_str, _ = fecha_y_horario_valido()
+    res = client.get(f"/api/cupos?fecha={fecha_str}")
     assert res.status_code == 200
     data = res.get_json()
     assert "turnos" in data
@@ -34,10 +47,10 @@ def test_api_cupos_fecha_valida(client):
 
 
 def test_api_inscribir_exitoso(client):
-    # Martes 20/10/2026 10:00 con simulación de tiempo a las 08:00
+    fecha_str, ahora_str = fecha_y_horario_valido()
     payload = {
         "actividad": "Tirolesa",
-        "fecha": "2026-10-20",
+        "fecha": fecha_str,
         "hora": "10:00",
         "cantidad_personas": 1,
         "visitantes": [
@@ -46,7 +59,7 @@ def test_api_inscribir_exitoso(client):
         "acepta_terminos": True,
         "id_terminos_aceptados": "TYC-TIRO-v1",
         "email": "ana@example.com",
-        "ahora": "2026-10-20T08:00:00",
+        "ahora": ahora_str,
     }
     res = client.post("/api/inscribir", json=payload)
     assert res.status_code == 201
@@ -58,9 +71,10 @@ def test_api_inscribir_exitoso(client):
 
 
 def test_api_inscribir_sin_aceptar_terminos(client):
+    fecha_str, ahora_str = fecha_y_horario_valido()
     payload = {
         "actividad": "Tirolesa",
-        "fecha": "2026-10-20",
+        "fecha": fecha_str,
         "hora": "10:00",
         "cantidad_personas": 1,
         "visitantes": [
@@ -68,7 +82,7 @@ def test_api_inscribir_sin_aceptar_terminos(client):
         ],
         "acepta_terminos": False,
         "email": "ana@example.com",
-        "ahora": "2026-10-20T08:00:00",
+        "ahora": ahora_str,
     }
     res = client.post("/api/inscribir", json=payload)
     assert res.status_code == 403
@@ -77,11 +91,63 @@ def test_api_inscribir_sin_aceptar_terminos(client):
     assert data["tipo_error"] == "TerminosNoAceptados"
 
 
+def test_api_inscribir_con_acepta_terminos_texto_false(client):
+    fecha_str, ahora_str = fecha_y_horario_valido()
+    payload = {
+        "actividad": "Tirolesa",
+        "fecha": fecha_str,
+        "hora": "10:00",
+        "cantidad_personas": 1,
+        "visitantes": [
+            {"nombre": "Ana Pérez", "dni": 30123456, "edad": 25, "talla": "M"}
+        ],
+        "acepta_terminos": "false",
+        "email": "ana@example.com",
+        "ahora": ahora_str,
+    }
+    res = client.post("/api/inscribir", json=payload)
+    assert res.status_code == 403
+    data = res.get_json()
+    assert data["exito"] is False
+    assert data["tipo_error"] == "TerminosNoAceptados"
+
+
+@pytest.mark.parametrize(
+    "visitantes_invalidos",
+    [
+        None,
+        "cadena_invalida",
+        123,
+        [None],
+        ["invalido"],
+        [{"nombre": "Ana"}, None],
+    ],
+)
+def test_api_inscribir_visitantes_mal_formados_no_provoca_error_500(client, visitantes_invalidos):
+    fecha_str, ahora_str = fecha_y_horario_valido()
+    payload = {
+        "actividad": "Tirolesa",
+        "fecha": fecha_str,
+        "hora": "10:00",
+        "cantidad_personas": 1,
+        "visitantes": visitantes_invalidos,
+        "acepta_terminos": True,
+        "id_terminos_aceptados": "TYC-TIRO-v1",
+        "email": "ana@example.com",
+        "ahora": ahora_str,
+    }
+    res = client.post("/api/inscribir", json=payload)
+    assert res.status_code == 422
+    data = res.get_json()
+    assert data["exito"] is False
+    assert data["tipo_error"] == "DatosVisitanteInvalidos"
+
+
 def test_api_correos_enviados(client):
-    # Primero hacemos una inscripción
+    fecha_str, ahora_str = fecha_y_horario_valido()
     payload = {
         "actividad": "Safari",
-        "fecha": "2026-10-20",
+        "fecha": fecha_str,
         "hora": "11:00",
         "cantidad_personas": 1,
         "visitantes": [
@@ -90,7 +156,7 @@ def test_api_correos_enviados(client):
         "acepta_terminos": True,
         "id_terminos_aceptados": "TYC-SAF-v1",
         "email": "carlos@example.com",
-        "ahora": "2026-10-20T08:00:00",
+        "ahora": ahora_str,
     }
     client.post("/api/inscribir", json=payload)
 

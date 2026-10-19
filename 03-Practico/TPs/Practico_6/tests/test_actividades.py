@@ -82,7 +82,12 @@ def test_aceptar_edad_minima_de_actividad(servicio, actividad, edad_minima):
 
 @pytest.mark.parametrize(
     ("actividad", "edad"),
-    [(Actividad.TIROLESA, 7), (Actividad.PALESTRA, 11)],
+    [
+        (Actividad.TIROLESA, 7),
+        (Actividad.TIROLESA, 0),
+        (Actividad.PALESTRA, 11),
+        (Actividad.PALESTRA, 0),
+    ],
 )
 def test_rechazar_visitante_por_debajo_de_la_edad_minima(servicio, actividad, edad):
     visitante = Visitante("Ana", 30123456, edad, "M")

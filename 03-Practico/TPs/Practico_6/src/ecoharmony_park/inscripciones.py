@@ -203,8 +203,6 @@ class ServicioInscripcion:
             or visitante.edad < 0
         ):
             raise DatosVisitanteInvalidos("La edad debe ser un entero no negativo")
-        if visitante.edad == 0 and actividad in self.EDAD_MINIMA:
-            raise DatosVisitanteInvalidos("La edad no alcanza el mínimo de la actividad")
         if actividad in self.ACTIVIDADES_CON_VESTIMENTA:
             if not isinstance(visitante.talla, str) or not visitante.talla.strip():
                 raise DatosVisitanteInvalidos("Esta actividad requiere talle de vestimenta")
