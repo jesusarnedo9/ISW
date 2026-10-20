@@ -1,8 +1,7 @@
 """Servidor web y API REST para EcoHarmony Park - Inscripción a actividades.
 
 Expone endpoints para consultar cupos, reglas de negocio y procesar inscripciones
-utilizando el núcleo de dominio probado de ecoharmony_park.
-"""
+utilizando el núcleo de dominio probado de ecoharmony_park."""
 
 from __future__ import annotations
 

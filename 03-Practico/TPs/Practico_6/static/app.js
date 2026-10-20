@@ -90,9 +90,9 @@
       cerrarModal(dom.modalComprobante);
       abrirModalCorreos();
     });
-    dom.btnModalNuevaReserva.addEventListener("click", () => {
+    dom.btnModalNuevaReserva.addEventListener("click", async () => {
       cerrarModal(dom.modalComprobante);
-      resetearFormulario();
+      await resetearFormulario();
     });
 
     dom.presetButtons.forEach((btn) => {
@@ -687,11 +687,23 @@
     }
   }
 
-  function resetearFormulario() {
+  async function resetearFormulario() {
     dom.checkTerminos.checked = false;
+    dom.emailContacto.value = "";
+    dom.cantidadPersonas.value = 1;
+    state.cantidadPersonas = 1;
+    state.actividadSeleccionada = null;
+    dom.actividadesGrid.querySelectorAll(".actividad-card").forEach((card) => {
+      card.classList.remove("selected");
+    });
+    dom.terminosId.textContent = "Seleccione una actividad";
+    dom.terminosTexto.textContent = "Seleccione una actividad para visualizar los términos y condiciones específicos.";
+    dom.visitantesFichas.innerHTML = "";
     ocultarError();
-    establecerFechaPredeterminada();
-    consultarCupos();
+    await consultarCupos();
+    dom.visitantesFichas.querySelectorAll(".input-nombre, .input-dni, .input-edad, .select-talla").forEach((campo) => {
+      campo.value = "";
+    });
   }
 
   function mostrarError(mensaje) {
