@@ -532,6 +532,7 @@ endobj
 /F1-0 7 0 R
 /F1-1 8 0 R
 /F1-2 9 0 R
+/F1-3 19 0 R
 /F2 10 0 R
 >>
 endobj
@@ -596,10 +597,79 @@ endobj
 >>
 endobj
 12 0 obj
+[ 20 0 R 21 0 R ]
+endobj
+13 0 obj
 <<
-/Length 4654
+/Contents 14 0 R
+/MediaBox [ 0 0 595.28 841.89 ]
+/Resources <<
+/Font 15 0 R
+/ProcSet [ /ImageB /ImageC /ImageI /PDF /Text ]
+>>
+/Rotate 0
+/Trans <<
+>>
+/Type /Page
+/Parent 2 0 R
+>>
+endobj
+14 0 obj
+[ 23 0 R 24 0 R ]
+endobj
+15 0 obj
+<<
+/F1 16 0 R
+/F1-0 22 0 R
+/F2 17 0 R
+>>
+endobj
+16 0 obj
+<<
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+/Name /F1
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+17 0 obj
+<<
+/BaseFont /Helvetica-Bold
+/Encoding /WinAnsiEncoding
+/Name /F2
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+18 0 obj
+<<
+/Author (\050anonymous\051)
+/CreationDate (D\07220261120191740\05503\04700\047)
+/Creator (\050unspecified\051)
+/Keywords ()
+/ModDate (D\07220261120191740\05503\04700\047)
+/Producer (ReportLab PDF Library \055 \050opensource\051)
+/Subject (\050unspecified\051)
+/Title (\050anonymous\051)
+/Trapped /False
+>>
+endobj
+19 0 obj
+<<
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+/Name /F1
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+20 0 obj
+<<
+/Length 4641
 >>
 stream
+q
 q
 1 0 0 1 0 0 cm
 BT
@@ -930,14 +1000,14 @@ q
 1 0 0 1 46 477.89 cm
 Q
 q
-1 0 0 1 46 415.89 cm
+1 0 0 1 46 370.89 cm
 q
 0.12549 0.188235 0.247059 rg
 BT
 1 0 0 1 0 14 Tm
 /F1 8 Tf
 11 TL
-(Las fechas de baseline\0552\054 baseline\0553 y baseline\0554 corresponden a sus etiquetas anotadas\056 Para baseline\0551 se usa la fecha del) Tj
+(Las fechas de baseline\0552 a baseline\0555 corresponden a sus etiquetas anotadas\056 Para baseline\0551 se usa la fecha del) Tj
 T*
 (commit porque la etiqueta es liviana\056) Tj
 T*
@@ -1021,28 +1091,104 @@ Q
 Q
 Q
 
+Q
+
 endstream
 endobj
-13 0 obj
+21 0 obj
 <<
-/Contents 14 0 R
-/MediaBox [ 0 0 595.28 841.89 ]
-/Resources <<
-/Font 15 0 R
-/ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
->>
-/Rotate 0
-/Trans <<
->>
-/Type /Page
-/Parent 2 0 R
->>
-endobj
-14 0 obj
-<<
-/Length 3155
+/Length 632
 >>
 stream
+q
+0.0 0.0 595.28 841.89 re
+W
+n
+1 0 0 1 0 0 cm
+BT
+/F1-3 12 Tf
+14.4 TL
+ET
+q
+1 0 0 1 46 415.89 cm
+q
+0 0 0 rg
+BT
+/F1-3 10 Tf
+12 TL
+ET
+q
+1 0 0 1 7 18 cm
+q
+0.12549 0.188235 0.247059 rg
+BT
+1 0 0 1 0 3 Tm
+/F1-3 8 Tf
+11 TL
+(25\05711\0572026) Tj
+T*
+ET
+Q
+Q
+q
+1 0 0 1 75 7 cm
+q
+BT
+1 0 0 1 0 14 Tm
+11 TL
+/F1-3 8 Tf
+0.12549 0.188235 0.247059 rg
+(baseline\0555) Tj
+T*
+(ddb785cd0e3e63de0544cf2ec4219e8553020c6e) Tj
+T*
+ET
+Q
+Q
+q
+1 0 0 1 310 18 cm
+q
+0.12549 0.188235 0.247059 rg
+BT
+1 0 0 1 0 3 Tm
+/F1-3 8 Tf
+11 TL
+(TP12 finalizado y calificado sin correcciones\056) Tj
+T*
+ET
+Q
+Q
+q
+1 J
+1 j
+0.796078 0.866667 0.886275 RG
+0.4 w
+n
+0 0 m
+515 0 l
+S
+Q
+Q
+Q
+Q
+
+endstream
+endobj
+22 0 obj
+<<
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+/Name /F1
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+23 0 obj
+<<
+/Length 3160
+>>
+stream
+q
 1 0 0 1 0 0 cm
 BT
 /F1 12 Tf
@@ -1357,73 +1503,75 @@ BT
 T*
 ET
 
+Q
+
 endstream
 endobj
-15 0 obj
+24 0 obj
 <<
-/F1 16 0 R
-/F2 17 0 R
+/Length 275
 >>
-endobj
-16 0 obj
-<<
-/BaseFont /Helvetica
-/Encoding /WinAnsiEncoding
-/Name /F1
-/Subtype /Type1
-/Type /Font
->>
-endobj
-17 0 obj
-<<
-/BaseFont /Helvetica-Bold
-/Encoding /WinAnsiEncoding
-/Name /F2
-/Subtype /Type1
-/Type /Font
->>
-endobj
-18 0 obj
-<<
-/Author (\050anonymous\051)
-/CreationDate (D\07220261120191740\05503\04700\047)
-/Creator (\050unspecified\051)
-/Keywords ()
-/ModDate (D\07220261120191740\05503\04700\047)
-/Producer (ReportLab PDF Library \055 \050opensource\051)
-/Subject (\050unspecified\051)
-/Title (\050anonymous\051)
-/Trapped /False
->>
+stream
+q
+0.0 0.0 595.28 841.89 re
+W
+n
+1 0 0 1 0 0 cm
+BT
+/F1-0 12 Tf
+14.4 TL
+ET
+q
+1 0 0 1 193 557 cm
+q
+0.12549 0.188235 0.247059 rg
+BT
+1 0 0 1 0 3 Tm
+/F1-0 8 Tf
+11 TL
+(Registro de baseline\0555\054 correspondiente al TP12 finalizado y calificado sin correcciones\056) Tj
+T*
+ET
+Q
+Q
+Q
+
+endstream
 endobj
 xref
-0 19
+0 25
 0000000000 65535 f 
 0000000015 00000 n 
 0000000083 00000 n 
 0000000156 00000 n 
 0000000351 00000 n 
 0000006277 00000 n 
-0000006355 00000 n 
-0000006462 00000 n 
-0000006569 00000 n 
-0000006676 00000 n 
-0000006783 00000 n 
-0000006896 00000 n 
-0000007093 00000 n 
-0000011800 00000 n 
-0000011998 00000 n 
-0000015206 00000 n 
-0000015250 00000 n 
-0000015358 00000 n 
-0000015471 00000 n 
+0000006368 00000 n 
+0000006475 00000 n 
+0000006582 00000 n 
+0000006689 00000 n 
+0000006796 00000 n 
+0000006909 00000 n 
+0000007106 00000 n 
+0000007140 00000 n 
+0000007338 00000 n 
+0000007372 00000 n 
+0000007429 00000 n 
+0000007537 00000 n 
+0000007650 00000 n 
+0000007975 00000 n 
+0000008083 00000 n 
+0000012777 00000 n 
+0000013461 00000 n 
+0000013569 00000 n 
+0000016782 00000 n 
 trailer
 <<
-/Size 19
+/Size 25
 /Root 1 0 R
 /Info 18 0 R
 /ID [ <733ac4b2fcecaf62c39693b29807cc6b> <733ac4b2fcecaf62c39693b29807cc6b> ]
 >>
 startxref
-15796
+17109
 %%EOF
